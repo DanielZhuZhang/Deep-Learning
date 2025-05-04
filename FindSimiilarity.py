@@ -42,3 +42,5 @@ for feature, score in mi_scores.items():
 
 top_features_list = list(mi_scores.index)
 print(top_features_list)
+
+

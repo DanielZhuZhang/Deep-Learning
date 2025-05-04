@@ -13,7 +13,7 @@ df['Performance'] = df['Performance'].map({'Low': 0, 'Normal': 1, 'High': 2})
 
 print(df.head())
 
-X = df[['failures', 'Dalc', 'activities']]
+X = df.drop('Performance', axis=1)
 
 print(X.head())
 
@@ -21,28 +21,33 @@ categorical_cols = X.select_dtypes(include=['object', 'category']).columns
 
 print("Categorical columns:", list(categorical_cols))
 
-#df_encoded = pd.get_dummies(X, columns=categorical_cols)
-X['activities'] = X['activities'].apply(lambda x: 1 if x == 'yes' else 0)
+y = to_categorical(df['Performance'])
+
+X = pd.get_dummies(X, columns=categorical_cols)
+
+bool_cols = X.select_dtypes(include='bool').columns
+
+X[bool_cols] = X[bool_cols].astype(int)
 
 print(X.head())
 
-y = to_categorical(df['Performance'])
 
 n_features = X.shape[1]
 
 model = models.Sequential(name="DeepNN", layers=[
-    ### hidden layer 1
     layers.Dense(name="h1", input_dim=n_features,
                  units=int(round((n_features + 1) / 2)),
                  activation='relu'),
     layers.Dropout(name="drop1", rate=0.2),
 
-    ### hidden layer 2
     layers.Dense(name="h2", units=int(round((n_features + 1) / 4)),
                  activation='relu'),
     layers.Dropout(name="drop2", rate=0.2),
 
-    ### layer output
+    layers.Dense(name="h3", units=int(round((n_features + 1) / 8)),
+                 activation='relu'),
+    layers.Dropout(name="drop3", rate=0.2),
+
     layers.Dense(name="output", units=3 , activation='softmax')
 ])
 model.summary()
